@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: RPI-Masto-Tag-Stream
-Plugin URI: https://rpi-virtuell.de
-Description: Importiere Mastodon-Beiträge mit einem bestimmten Tag in WordPress.
+Plugin URI: https://github.com/rpi-virtuell/rpi_masto_tag_stream
+Description: Stelle Mastodon-Beiträge mit einem bestimmten Tag in WordPress. Shortcode exa,ple: [mastodon-stream tag="relilab" limit=4]
 Version: 1.0
 Author: Joachim Happel
-Author URI: https://
+Author URI: https://github.com/rpi-virtuell/johappel
 */
 
 // Funktion zum Abrufen von Daten von der Mastodon-API
