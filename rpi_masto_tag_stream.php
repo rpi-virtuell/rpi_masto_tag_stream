@@ -133,6 +133,7 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     // Beiträge von Mastodon abrufen
     $posts = rpi_masto_tag_stream_get_mastodon_data($apiUrl, $accessToken);
 
+    ob_start();
     ?>
     <style>
         .rpi-masto-feed{
@@ -177,6 +178,12 @@ function rpi_masto_tag_stream_get_data($atts, $content)
         }.rpi-masto-feed .masto-content{
             font-size: small;
         }
+        @media screen and (max-width: 600px) {
+            .rpi-masto-feed{
+                grid-template-columns: 1fr;
+            }
+        }
+
 
     </style>
     <div class="rpi-masto-feed">
@@ -207,7 +214,7 @@ function rpi_masto_tag_stream_get_data($atts, $content)
            // echo '<pre>';var_dump($p);
         }
 
-        if(isset($p['media_attachments'])){
+        if(isset($p['media_attachments']) && isset($p['media_attachments'][0])){
             //var_dump($p['media_attachments']);
             $media = ($p['media_attachments'][0]);
             if('image' == $media['type']){
@@ -239,13 +246,12 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     ?>
     </div>
     <?php
+    return ob_get_clean();
 }
 
 function rpi_masto_tag_stream_template(stdClass $post)
 {
-    //echo '<pre>';
-    //var_dump($post);
-    //</pre>
+
     ?>
     <div class="masto-entry">
         <header class="acc">
