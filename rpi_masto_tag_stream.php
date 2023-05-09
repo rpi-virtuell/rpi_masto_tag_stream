@@ -2,7 +2,7 @@
 /*
 Plugin Name: RPI-Masto-Tag-Stream
 Plugin URI: https://github.com/rpi-virtuell/rpi_masto_tag_stream
-Description: Stelle Mastodon-Beiträge mit einem bestimmten Tag in WordPress. Shortcode exa,ple: [mastodon-stream tag="relilab" limit=4]
+Description: Stelle Mastodon-Beiträge mit einem bestimmten Tag in WordPress. Shortcode exa,ple: [mastodon-stream tag="relilab" limit=4 cols="2"]
 Version: 1.0
 Author: Joachim Happel
 Author URI: https://github.com/rpi-virtuell/johappel
@@ -127,8 +127,10 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     }
 
     // Gewünschten Tag festlegen
-    $tag = $atts['tag'];
-    $limit = isset($atts['limit'])? $atts['limit'] : 5;
+    $tag    = $atts['tag'];
+    $limit  = isset($atts['limit'])? $atts['limit'] : 5;
+    $cols   = isset($atts['cols']) ? $atts['cols'] : 2;
+
 
     // API-Endpunkt zum Abrufen der Beiträge mit dem gewünschten Tag
 
@@ -141,7 +143,7 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     <style>
         .rpi-masto-feed{
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: <?php for($i=0; $i < $cols; $i++){ echo '1fr '; }?>;
             overflow: hidden;
             grid-column-gap: 30px;
         }
