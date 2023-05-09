@@ -9,8 +9,10 @@ Author URI: https://
 */
 
 // Funktion zum Abrufen von Daten von der Mastodon-API
-function rpi_masto_tag_stream_get_mastodon_data($url, $accessToken)
+function rpi_masto_tag_stream_get_mastodon_data($tag, $accessToken, $limit=10)
 {
+    $instanceUrl = get_option('rpi_masto_tag_stream_instance_url');
+    $url = $instanceUrl . '/api/v1/timelines/tag/' . $tag .'?limit='.$limit;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -126,12 +128,13 @@ function rpi_masto_tag_stream_get_data($atts, $content)
 
     // Gewünschten Tag festlegen
     $tag = $atts['tag'];
+    $limit = isset($atts['limit'])? $atts['limit'] : 5;
 
     // API-Endpunkt zum Abrufen der Beiträge mit dem gewünschten Tag
-    $apiUrl = $instanceUrl . '/api/v1/timelines/tag/' . $tag;
+
 
     // Beiträge von Mastodon abrufen
-    $posts = rpi_masto_tag_stream_get_mastodon_data($apiUrl, $accessToken);
+    $posts = rpi_masto_tag_stream_get_mastodon_data($tag, $accessToken, $limit);
 
     ob_start();
     ?>
@@ -146,7 +149,8 @@ function rpi_masto_tag_stream_get_data($atts, $content)
             padding: 15px;
             background-color: #c0c0c0;
             margin-bottom: 30px;
-
+            display: grid;
+            grid-template-rows: auto 1fr auto 20px;
         }
         .rpi-masto-feed .acc .p-author{
             display: grid;
@@ -178,6 +182,12 @@ function rpi_masto_tag_stream_get_data($atts, $content)
         }.rpi-masto-feed .masto-content{
             font-size: small;
         }
+        footer .link {
+            font-size: small;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
         @media screen and (max-width: 600px) {
             .rpi-masto-feed{
                 grid-template-columns: 1fr;
@@ -196,7 +206,7 @@ function rpi_masto_tag_stream_get_data($atts, $content)
 
         $post = new stdClass();
         $post->status_id = $p['id'];
-        $post->post_date = $p['created_at'];
+        $post->post_date = date('d.m.Y',strtotime($p['created_at']));
         $post->post_content = $p['content'];
 
 
@@ -257,14 +267,14 @@ function rpi_masto_tag_stream_template(stdClass $post)
         <header class="acc">
             <div class="p-author h-card">
                 <a class="detailed-status__display-name u-url" target="_blank" rel="noopener"
-                   href="https://reliverse.social/@heller">
+                   href="<?php echo $post->account_url; ?>">
                     <div class="detailed-status__display-avatar">
                         <img alt="" class="account__avatar u-photo"
                              src="<?php echo $post->account_avatar; ?>" style="max-width: 80px">
                     </div>
                     <div class="display-name">
                         <strong class="display-name__html p-name emojify"><?php echo $post->account_display_name; ?></strong>
-                        <span class="display-name__account">@<?php echo $post->account_username; ?></span>
+                        <span class="display-name__account">@<?php echo $post->account_username; ?> am <?php echo $post->post_date?></span>
                     </div>
                 </a>
                 <div>
@@ -276,10 +286,17 @@ function rpi_masto_tag_stream_template(stdClass $post)
         <article class="masto-post">
             <div class="masto-content">
                 <?php echo  $post->post_content; ?>
-                <?php echo  $post->image; ?>
-                <?php echo  $post->card_html; ?>
+                <a class="detailed-status__display-name u-url" target="_blank" rel="noopener"
+                   href="<?php echo $post->url; ?>">
+                    <?php echo  $post->image; ?>
+                    <?php echo  $post->card_html; ?>
+                </a>
             </div>
+
         </article>
+        <div class="gost"></div>
+        <footer><a class="link" target="_blank" rel="noopener"
+                   href="<?php echo $post->url; ?>">Beitrag am Originalort öffnen</a></footer>
     </div>
     <?php
 /*
