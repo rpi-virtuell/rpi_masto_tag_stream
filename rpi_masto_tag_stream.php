@@ -130,7 +130,10 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     $tag    = $atts['tag'];
     $limit  = isset($atts['limit'])? $atts['limit'] : 5;
     $cols   = isset($atts['cols']) ? $atts['cols'] : 2;
-
+    $grid_template_columns = '1fr ';
+    for($i=0; $i < $cols-1; $i++){
+        $grid_template_columns .= '1fr ';
+    }
 
     // API-Endpunkt zum Abrufen der Beiträge mit dem gewünschten Tag
 
@@ -139,65 +142,8 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     $posts = rpi_masto_tag_stream_get_mastodon_data($tag, $accessToken, $limit);
 
     ob_start();
+    rpi_masto_tag_the_post_style($grid_template_columns);
     ?>
-    <style>
-        .rpi-masto-feed{
-            display: grid;
-            grid-template-columns: <?php for($i=0; $i < $cols; $i++){ echo '1fr '; }?>;
-            overflow: hidden;
-            grid-column-gap: 30px;
-        }
-        .rpi-masto-feed .masto-entry{
-            padding: 15px;
-            background-color: #c0c0c0;
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-rows: auto 1fr auto 20px;
-        }
-        .rpi-masto-feed .acc .p-author{
-            display: grid;
-            grid-template-columns: auto 90px;
-            grid-column-gap: 5px;
-            background-color: #777;
-            padding: 10px;
-            border: 1px solid #000;
-        }
-        .rpi-masto-feed .acc a{
-            color: #fff;
-        }
-        .rpi-masto-feed .acc .detailed-status__display-name{
-            display: grid;
-            grid-template-columns: 80px auto;
-            grid-column-gap: 10px;
-        }
-        .rpi-masto-feed .masto-entry{
-            max-width: 100%;
-            overflow: hidden;
-        }
-        .rpi-masto-feed .display-name__account{
-            font-size: small;
-        }
-        .rpi-masto-feed .masto-post{
-            border: 1px solid #fff;
-            padding: 10px;
-
-        }.rpi-masto-feed .masto-content{
-            font-size: small;
-        }
-        footer .link {
-            font-size: small;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-        }
-        @media screen and (max-width: 600px) {
-            .rpi-masto-feed{
-                grid-template-columns: 1fr;
-            }
-        }
-
-
-    </style>
     <div class="rpi-masto-feed">
     <?php
 
@@ -251,7 +197,7 @@ function rpi_masto_tag_stream_get_data($atts, $content)
             $post->card_html = '';
         }
 
-        rpi_masto_tag_stream_template($post);
+        rpi_masto_tag_the_post($post);
 
 
     }
@@ -260,8 +206,66 @@ function rpi_masto_tag_stream_get_data($atts, $content)
     <?php
     return ob_get_clean();
 }
+function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
+    ?>
+    <style>
+        .rpi-masto-feed{
+            display: grid;
+            grid-template-columns: <?php echo $grid_template_columns;?>;
+            overflow: hidden;
+            grid-column-gap: 30px;
+        }
+        .rpi-masto-feed .masto-entry{
+            padding: 15px;
+            background-color: #c0c0c0;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-rows: auto 1fr auto 20px;
+        }
+        .rpi-masto-feed .acc .p-author{
+            display: grid;
+            grid-template-columns: auto 90px;
+            grid-column-gap: 5px;
+            background-color: #777;
+            padding: 10px;
+            border: 1px solid #000;
+        }
+        .rpi-masto-feed .acc a{
+            color: #fff;
+        }
+        .rpi-masto-feed .acc .detailed-status__display-name{
+            display: grid;
+            grid-template-columns: 80px auto;
+            grid-column-gap: 10px;
+        }
+        .rpi-masto-feed .masto-entry{
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .rpi-masto-feed .display-name__account{
+            font-size: small;
+        }
+        .rpi-masto-feed .masto-post{
+            border: 1px solid #fff;
+            padding: 10px;
 
-function rpi_masto_tag_stream_template(stdClass $post)
+        }.rpi-masto-feed .masto-content{
+             font-size: small;
+         }
+        footer .link {
+            font-size: small;
+            text-align: center;
+            display: block;
+        }
+        @media screen and (max-width: 600px) {
+            .rpi-masto-feed{
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <?php
+}
+function rpi_masto_tag_the_post(stdClass $post)
 {
 
     ?>
