@@ -178,7 +178,17 @@ function rpi_masto_tag_stream_get_data($atts, $content)
             if('image' == $media['type']){
                 $post->image = '<img src="'.$media['url'].'">';
             }elseif ('gifv' == $media['type']){
-                $post->image = apply_filters('the_content',$media['url']);
+
+
+
+                $post->image = wp_video_shortcode([
+                    'src'=>$media['url'],
+                    'width'=>'400',
+                    'loop'=>'yes',
+                    'class'=>'rpi-masto-video'
+                ]);
+
+
             }
 
         }
@@ -249,9 +259,15 @@ function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
             border: 1px solid #fff;
             padding: 10px;
 
-        }.rpi-masto-feed .masto-content{
+        }
+        .rpi-masto-feed .masto-content{
              font-size: small;
-         }
+        }
+        .rpi-masto-feed .wp-video {
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
         footer .link {
             font-size: small;
             text-align: center;
