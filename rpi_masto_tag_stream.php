@@ -288,22 +288,27 @@ function rpi_masto_tag_the_post(stdClass $post)
     <div class="masto-entry">
         <header class="acc">
             <div class="p-author h-card">
-                <a class="detailed-status__display-name u-url" target="_blank" rel="noopener"
-                   href="<?php echo $post->account_url; ?>">
-                    <div class="detailed-status__display-avatar">
-                        <img alt="" class="account__avatar u-photo"
-                             src="<?php echo $post->account_avatar; ?>" style="max-width: 80px">
+                <div class="detailed-status__display-name u-url">
+                    <div >
+                        <a target="_blank" rel="noopener"
+                           href="<?php echo $post->account_url; ?>">
+                            <div class="detailed-status__display-avatar">
+                                <img alt="" class="account__avatar u-photo"
+                                     src="<?php echo $post->account_avatar; ?>" style="max-width: 80px"></div><div class="display-name">
+                            </div>
+                        </a>
+
                     </div>
-                    <div class="display-name">
+                    <div>
                         <strong class="display-name__html p-name emojify"><?php echo $post->account_display_name; ?></strong>
                         <span class="display-name__account">@<?php echo $post->account_username; ?> am <?php echo $post->post_date?></span>
+
                     </div>
-                </a>
+                </div>
                 <div>
                     <a class="button logo-button" target="_new" href="<?php echo $post->account_url; ?>">Folgen</a>
                 </div>
             </div>
-
         </header>
         <article class="masto-post">
             <div class="masto-content">
