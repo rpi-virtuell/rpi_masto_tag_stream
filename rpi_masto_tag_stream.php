@@ -156,6 +156,7 @@ function rpi_masto_tag_stream_get_data($atts, $content)
         $post->status_id = $p['id'];
         $post->post_date = date('d.m.Y',strtotime($p['created_at']));
         $post->post_content = $p['content'];
+        $post->post_exerpt = wp_trim_words(strip_tags($p['content']),15,' ...');
 
 
         $post->url = $p['url'];
@@ -223,22 +224,62 @@ function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
             display: grid;
             grid-template-columns: <?php echo $grid_template_columns;?>;
             overflow: hidden;
-            grid-column-gap: 30px;
+            grid-column-gap: 20px;
         }
-        .rpi-masto-feed .masto-entry{
-            padding: 15px;
-            background-color: #c0c0c0;
-            margin-bottom: 30px;
-            display: grid;
-            grid-template-rows: auto 1fr auto 20px;
+        .rpi-masto-feed .masto-entry {
+
+            max-width: 100%;
+            overflow: hidden;
+            border-image: linear-gradient(to right, #ddd, #eee) 0.5;
+            border: 10px solid #fff;
+            margin-bottom: 0px;
+
+        }
+        .rpi-masto-feed .masto-entry.open #wrap{
+            /*display: grid;*/
+            grid-template-rows: 100px auto auto 20px;
+            background-color: white;
+        }
+        .rpi-masto-feed .open{
+            background-color: #fff;
+            border-image: linear-gradient(to right, #5790ac, #91d6f8) 0.5;
+            border-bottom: 0;
+        }
+        .rpi-masto-feed .acc{
+            background-image: linear-gradient(to right, #5790ac, #70a7d4, #91d6f8);
+
         }
         .rpi-masto-feed .acc .p-author{
             display: grid;
-            grid-template-columns: auto 90px;
+            grid-template-columns: 100px auto;
             grid-column-gap: 5px;
-            background-color: #777;
+            background-color: transparent;
             padding: 10px;
-            border: 1px solid #000;
+
+        }
+        .rpi-masto-feed .acc .author-right-col{
+            display: grid;
+            grid-template-rows: 30px auto 15px;
+            margin: -4px;
+
+        }
+        .follow-button{
+            text-align: right;
+        }
+        .follow-button .button{
+
+            background-color:  #0073aa;
+            color:#fff;
+            z-index: 10;
+        }
+        .follow-button .button:hover{
+            background-color: #fff;
+            color: #0073aa;
+        }
+        .display-name{
+            text-align: center;
+            color: #444;
+            min-height: 50px;
         }
         .rpi-masto-feed .acc a{
             color: #fff;
@@ -278,6 +319,52 @@ function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
                 grid-template-columns: 1fr;
             }
         }
+        .sum-grid{
+            display: grid;
+            grid-template-columns: 60px auto;
+        }
+        details.masto-entry.open .sum-grid{
+            display: grid;
+            grid-template-columns: 50px auto;
+        }
+        .sum-grid .short-message{
+            font-size: x-small;
+        }
+        details.masto-entry.open .sum-grid .detailed-status__display-avatar,
+        details.masto-entry.open .sum-grid .short-message{
+            display: none;
+        }
+        details.masto-entry .close-details{
+            display: none;
+        }
+        details.masto-entry.open .close-details{
+            display: block;
+        }
+        details.masto-entry.open .close-details .button{
+            max-width: fit-content;
+            text-align: center;
+            margin: 5px;
+        }
+        .button-secondary{
+            background-color: transparent;
+            border: 2px solid transparent;
+            color: #777777;
+            padding: 5px;
+        }
+        .button-secondary:hover{
+            background-color: #777777;
+            color: white;
+        }
+        .masto-wrapper .footer{
+            padding: 0 15px;
+            margin: 0 0 20px;
+            display: block;
+            background-image: linear-gradient(to right, #5790ac,#91d6f8);
+            font-size: small;
+        }
+        .masto-wrapper .footer a{
+            color: white;
+        }
     </style>
     <?php
 }
@@ -285,45 +372,68 @@ function rpi_masto_tag_the_post(stdClass $post)
 {
 
     ?>
-    <div class="masto-entry">
-        <header class="acc">
-            <div class="p-author h-card">
-                <div class="detailed-status__display-name u-url">
-                    <div >
-                        <a target="_blank" rel="noopener"
-                           href="<?php echo $post->account_url; ?>">
-                            <div class="detailed-status__display-avatar">
-                                <img alt="" class="account__avatar u-photo"
-                                     src="<?php echo $post->account_avatar; ?>" style="max-width: 80px"></div><div class="display-name">
-                            </div>
-                        </a>
+    <div class="masto-wrapper">
+        <details class="masto-entry">
+            <summary class="sum-grid">
 
+                <div class="detailed-status__display-avatar">
+                    <img alt="" class="account__avatar u-photo"
+                         src="<?php echo $post->account_avatar; ?>" style="max-width: 50px"></div>
+                <div class="short-message"><?php echo $post->post_exerpt;?></div>
+                <div class="close-details"><div class="button button-secondary"><span class="dashicons dashicons-arrow-up"></span></div></div>
+                <div class="close-details">
+                    <table>
+                        <tr>
+                            <td class="display-name">
+                                <strong><?php echo $post->account_display_name; ?></strong>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </summary>
+            <header class="acc">
+                <div class="p-author h-card">
+                    <div class="detailed-status__display-name u-url">
+                        <div >
+                            <a target="_blank" rel="noopener"
+                               href="<?php echo $post->account_url; ?>">
+                                <div class="detailed-status__display-avatar">
+                                    <img alt="" class="account__avatar u-photo"
+                                         src="<?php echo $post->account_avatar; ?>" style="max-width: 90px"></div>
+                            </a>
+                        </div>
                     </div>
-                    <div>
-                        <strong class="display-name__html p-name emojify"><?php echo $post->account_display_name; ?></strong>
-                        <span class="display-name__account">@<?php echo $post->account_username; ?> am <?php echo $post->post_date?></span>
-
+                    <div class="author-right-col">
+                        <div  class="follow-button">
+                            <a class="button" target="_new" href="<?php echo $post->account_url; ?>">Folgen</a>
+                        </div>
+                        <div class="ghost"> </div>
+                        <div>
+                            <a class="link" target="_blank" rel="noopener"
+                               href="<?php echo $post->account_url; ?>"><span class="display-name__account">@<?php echo $post->account_username; ?></span></a>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <a class="button logo-button" target="_new" href="<?php echo $post->account_url; ?>">Folgen</a>
+            </header>
+            <article class="masto-post">
+                <div class="masto-content">
+                    <?php echo  $post->post_content; ?>
+                    <a class="detailed-status__display-name u-url" target="_blank" rel="noopener"
+                       href="<?php echo $post->url; ?>">
+                        <?php echo  $post->image; ?>
+                        <?php echo  $post->card_html; ?>
+                    </a>
                 </div>
-            </div>
-        </header>
-        <article class="masto-post">
-            <div class="masto-content">
-                <?php echo  $post->post_content; ?>
-                <a class="detailed-status__display-name u-url" target="_blank" rel="noopener"
-                   href="<?php echo $post->url; ?>">
-                    <?php echo  $post->image; ?>
-                    <?php echo  $post->card_html; ?>
-                </a>
-            </div>
 
-        </article>
-        <div class="gost"></div>
-        <footer><a class="link" target="_blank" rel="noopener"
-                   href="<?php echo $post->url; ?>">Beitrag am Originalort öffnen</a></footer>
+            </article>
+            <div class="gost"></div>
+        </details>
+        <footer>
+            <div class="footer">
+                <a target="_blank" rel="noopener" href="<?php echo $post->url; ?>">@<?php echo $post->account_username; ?> am <?php echo $post->post_date?></a>
+            </div>
+        </footer>
     </div>
     <?php
 /*
