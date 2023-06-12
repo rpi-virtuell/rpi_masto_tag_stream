@@ -11,8 +11,26 @@ Author URI: https://github.com/rpi-virtuell/johappel
 // Funktion zum Abrufen von Daten von der Mastodon-API
 function rpi_masto_tag_stream_get_mastodon_data($tag, $accessToken, $limit=10)
 {
+    $tags = explode(' ', $tag);
+    $hashtags=[];
+    foreach ($tags as $t){
+        if(!empty($t)){
+            $hashtags[] = trim($t);
+        }
+    }
+    $tag_querystring = array_shift($hashtags);
+
+    if(is_array($hashtags) && count($hashtags)>0){
+        $tag_querystring .= '?';
+        $tag_querystring .= implode('&any[]=', $hashtags);
+        $tag_querystring .= '&limit='.$limit;
+    }else{
+        $tag_querystring .= '?limit='.$limit;
+    }
+
+
     $instanceUrl = get_option('rpi_masto_tag_stream_instance_url');
-    $url = $instanceUrl . '/api/v1/timelines/tag/' . $tag .'?limit='.$limit;
+    $url = $instanceUrl . '/api/v1/timelines/tag/' . $tag_querystring;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -152,12 +170,14 @@ function rpi_masto_tag_stream_get_data($atts, $content)
 
        // echo'<pre>';var_dump($p); die();
 
+        $regex = "@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?).*$)@";
+
         $post = new stdClass();
         $post->status_id = $p['id'];
         $post->post_date = date('d.m.Y',strtotime($p['created_at']));
         $post->post_content = $p['content'];
         $post->post_exerpt = wp_trim_words(strip_tags($p['content']),15,' ...');
-
+        $post->post_exerpt =  preg_replace($regex, ' ', $post->post_exerpt);
 
         $post->url = $p['url'];
 
@@ -227,13 +247,14 @@ function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
             grid-column-gap: 20px;
         }
         .rpi-masto-feed .masto-entry {
-
             max-width: 100%;
             overflow: hidden;
             border-image: linear-gradient(to right, #ddd, #eee) 0.5;
             border: 10px solid #fff;
             margin-bottom: 0px;
-
+        }
+        .rpi-masto-feed .masto-entry{
+            overflow-wrap: break-word!important;
         }
         .rpi-masto-feed .masto-entry.open #wrap{
             /*display: grid;*/
@@ -247,7 +268,6 @@ function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
         }
         .rpi-masto-feed .acc{
             background-image: linear-gradient(to right, #5790ac, #70a7d4, #91d6f8);
-
         }
         .rpi-masto-feed .acc .p-author{
             display: grid;
@@ -255,13 +275,11 @@ function rpi_masto_tag_the_post_style($grid_template_columns='1fr'){
             grid-column-gap: 5px;
             background-color: transparent;
             padding: 10px;
-
         }
         .rpi-masto-feed .acc .author-right-col{
             display: grid;
             grid-template-rows: 30px auto 15px;
             margin: -4px;
-
         }
         .follow-button{
             text-align: right;
